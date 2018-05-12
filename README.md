@@ -1,4 +1,4 @@
-> **repop** is a library which makes it easy to combine React (re) and [popmotion] (pop).
+> **repop** is a library which makes it easy to combine React (re) and [popmotion](pop).
 
 Repop provides convenience functions which allow you to create components that use popmotion to interpolate props.
 
@@ -69,5 +69,10 @@ const AnimatedCircle = partiallyAnimated({
   render: props => <circle {...props} />
 });
 ```
+
+# Playground
+
+The repository includes a few examples in the `playground/` folder. Use `npm run playground`
+to start the playground server on [localhost:3000](http://localhost:3000).
 
 [popmotion]: https://popmotion.io/

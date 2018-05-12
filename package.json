@@ -7,9 +7,17 @@
     "react": "^16.0.0"
   },
   "devDependencies": {
-    "popmotion": "^8.0.0",
-    "react": "^16.0.0",
     "@types/react": "^16.0.0",
+    "@zeit/next-typescript": "^1.0.0",
+    "next": "^6.0.1",
+    "popmotion": "^8.0.0",
+    "prando": "^3.0.3",
+    "ramda": "^0.25.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.3.2",
     "typescript": "^2.8.0"
+  },
+  "scripts": {
+    "playground": "next dev playground"
   }
 }

@@ -1,5 +1,7 @@
 > **repop** is a library which makes it easy to combine React (re) and [popmotion](pop).
 
+ - [Documentation](https://amazing-mestorf-5fbae8.netlify.com/)
+
 Repop provides convenience functions which allow you to create components that use popmotion to interpolate props.
 
 # Quickstart

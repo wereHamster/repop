@@ -1,5 +1,9 @@
+.next
+docs
+examples
 node_modules
-playground
+out
+pages
 next.config.js
 .babelrc
 .npmignore

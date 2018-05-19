@@ -1,6 +1,6 @@
 import * as React from "react";
 import { spring } from "popmotion";
-import { animated } from "../../src/animated";
+import { animated } from "../src/animated";
 import { range } from "ramda";
 import Prando from "prando";
 

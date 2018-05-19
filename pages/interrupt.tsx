@@ -1,10 +1,10 @@
 import * as React from "react";
 import { spring } from "popmotion";
-import { animated } from "../../src/animated";
+import { animated } from "../src/animated";
 
 const ox = 200;
 const oy = 200;
-const theta = 0.4;
+const theta = 1.8;
 
 export interface State {
   cx: number;
@@ -31,11 +31,17 @@ export default class extends React.PureComponent<{}, State> {
     this.setState({ cx: x, cy: y, last });
 
     // And reschedule.
-    setTimeout(this.advance, 1000);
+    setTimeout(this.advance, 3000);
+  };
+
+  interrupt = () => {
+    this.forceUpdate();
+    setTimeout(this.interrupt, 200);
   };
 
   componentDidMount() {
     this.advance();
+    this.interrupt();
   }
 
   render() {
@@ -55,19 +61,31 @@ export default class extends React.PureComponent<{}, State> {
           />
         ))}
 
-        <AnimatedCircle cx={cx} cy={cy} r={Math.round(cx * cy) % 6 + 2} fill="teal" />
+        <AnimatedCircle
+          cx={cx}
+          cy={cy}
+          r={6}
+          fill="teal"
+          fillOpacity={0.8}
+        />
       </svg>
     );
   }
 }
 
-const AnimatedCircle = animated<{ cx: number; cy: number; r: number; fill: string }>({
+const AnimatedCircle = animated<{
+  cx: number;
+  cy: number;
+  r: number;
+  fill: string;
+  fillOpacity: number;
+}>({
   action: (from, to) =>
     spring({
       from,
       to,
-      stiffness: 10,
-      damping: 10
+      stiffness: 30,
+      damping: 5
     }),
 
   render: (props, { cx, cy }) => {

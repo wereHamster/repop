@@ -72,7 +72,7 @@ const AnimatedCircle = partiallyAnimated({
 
 # Playground
 
-The repository includes a few examples in the `playground/` folder. Use `npm run playground`
+The repository includes a few examples in the `pages/` folder. Use `npm run dev`
 to start the playground server on [localhost:3000](http://localhost:3000).
 
 [popmotion]: https://popmotion.io/

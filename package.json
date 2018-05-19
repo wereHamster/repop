@@ -18,6 +18,6 @@
     "typescript": "^2.8.0"
   },
   "scripts": {
-    "playground": "next dev playground"
+    "dev": "next dev"
   }
 }

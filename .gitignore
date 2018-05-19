@@ -1,4 +1,4 @@
 node_modules
-playground/.next
+.next
 *.js
 *.d.ts

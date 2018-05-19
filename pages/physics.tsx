@@ -35,23 +35,16 @@ export default class extends React.PureComponent<{}, State> {
     this.setState({ cx: prng.nextInt(0, 800), cy: prng.nextInt(0, 800), last });
 
     // And reschedule.
-    setTimeout(this.advance, 600);
+    setTimeout(this.advance, 1000);
   };
 
   interrupt = () => {
     this.forceUpdate();
-    setTimeout(this.interrupt, 150);
   };
 
   componentDidMount() {
     this.advance();
-    this.interrupt();
   }
-
-  componentDidUpdate() {
-    // console.log('update', window.performance.now())
-  }
-
   render() {
     const { cx, cy, last } = this.state;
 
@@ -59,13 +52,7 @@ export default class extends React.PureComponent<{}, State> {
       <svg width={800} height={800}>
         <circle cx={cx} cy={cy} r={8} fill="black" />
 
-        <AnimatedCircle
-          cx={cx}
-          cy={cy}
-          r={6}
-          fill="teal"
-          fillOpacity={0.8}
-        />
+        <AnimatedCircle cx={cx} cy={cy} r={6} fill="teal" fillOpacity={0.8} />
 
         <PhysicallyAnimatedCircle
           cx={cx}
@@ -73,6 +60,16 @@ export default class extends React.PureComponent<{}, State> {
           r={6}
           fill="magenta"
           fillOpacity={0.8}
+        />
+
+        <rect
+          x={0}
+          y={0}
+          width={800}
+          height={800}
+          fill="transparent"
+          onMouseMove={this.interrupt}
+          onClick={this.interrupt}
         />
       </svg>
     );
@@ -91,7 +88,7 @@ const AnimatedCircle = animated<{
       from,
       to,
       stiffness: 20,
-      damping: 3
+      damping: 8
     }),
 
   render: (props, { cx, cy }) => {
@@ -115,13 +112,13 @@ const PhysicallyAnimatedCircle = physicallyAnimated<
   actions: {
     cx: {
       springStrength: 10,
-      acceleration: 10,
-      friction: 0.5,
+      acceleration: 5,
+      friction: 0.5
     },
     cy: {
       springStrength: 10,
-      acceleration: 10,
-      friction: 0.5,
+      acceleration: 5,
+      friction: 0.5
     }
   },
   render: props => {

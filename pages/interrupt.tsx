@@ -36,12 +36,10 @@ export default class extends React.PureComponent<{}, State> {
 
   interrupt = () => {
     this.forceUpdate();
-    setTimeout(this.interrupt, 200);
   };
 
   componentDidMount() {
     this.advance();
-    this.interrupt();
   }
 
   render() {
@@ -61,12 +59,16 @@ export default class extends React.PureComponent<{}, State> {
           />
         ))}
 
-        <AnimatedCircle
-          cx={cx}
-          cy={cy}
-          r={6}
-          fill="teal"
-          fillOpacity={0.8}
+        <AnimatedCircle cx={cx} cy={cy} r={6} fill="teal" fillOpacity={0.8} />
+
+        <rect
+          x={0}
+          y={0}
+          width={400}
+          height={400}
+          fill="transparent"
+          onMouseMove={this.interrupt}
+          onClick={this.interrupt}
         />
       </svg>
     );

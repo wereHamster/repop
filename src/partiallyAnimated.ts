@@ -6,12 +6,6 @@ export type Actions<T> = { [P in keyof T]: (from: T[P], to: T[P]) => Action };
 
 type Subscriptions<T> = { [P in keyof T]?: undefined | ColdSubscription };
 
-const clearSubscriptions = <T>(s: Subscriptions<T>) => {
-  for (const k in s) {
-    s[k] && s[k].stop();
-  }
-};
-
 type Observers<T> = { [P in keyof T]: any };
 
 type Component<T> = React.Component<{}, T> & { s: Subscriptions<T> };
@@ -57,14 +51,16 @@ export const partiallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     componentWillReceiveProps(nextProps: P & S) {
       for (const k in actions) {
         if (this.props[k] !== nextProps[k]) {
-          this.s[k] && (this.s[k].stop());
+          this.s[k] && this.s[k].stop();
           this.s[k] = actions[k](this.state[k], nextProps[k]).start(this.o[k]);
         }
       }
     }
 
     componentWillUnmount() {
-      clearSubscriptions(this.s);
+      for (const k in this.s) {
+        this.s[k] && this.s[k].stop();
+      }
     }
 
     render() {

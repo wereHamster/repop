@@ -1,16 +1,9 @@
 import * as React from "react";
-import { physics } from "popmotion";
+import { Action } from "popmotion/action";
 import { ColdSubscription } from "popmotion/action/types";
+import value, { ValueReaction } from "popmotion/reactions/value";
 
-export interface ActionProps {
-  acceleration?: number;
-  restSpeed?: number;
-  friction?: number;
-  springStrength?: number;
-  velocity?: number;
-}
-
-export type Actions<T> = { [P in keyof T]: ActionProps };
+export type Actions<T> = { [P in keyof T]: (from: T[P], velocity: number, to: T[P]) => Action };
 
 type Subscriptions<T> = { [P in keyof T]?: undefined | ColdSubscription };
 
@@ -20,23 +13,15 @@ const clearSubscriptions = <T>(s: Subscriptions<T>) => {
   }
 };
 
-type Component<T> = React.Component<{}, T> & { s: Subscriptions<T> };
+type Component<P, S> = React.Component<P & S, S> & { s: Subscriptions<S> };
 
-type Observers<T> = { [P in keyof T]: any };
-
-const mkObservers = <T>(self: Component<T>, p: Actions<T>): Observers<T> => {
+type Values<T> = { [P in keyof T]?: ValueReaction };
+const mkValues = <P, S>(self: Component<P, S>, a: Actions<S>): Values<S> => {
   const s: any = {};
-  for (const k in p) {
-    s[k] = {
-      update: v => {
-        self.setState({ [k]: v } as any);
-      },
-      complete: () => {
-        self.s[k] = undefined;
-      }
-    };
+  for (const k in a) {
+    s[k] = value(self.props[k] as any);
   }
-  return s as Observers<T>;
+  return s as Values<P & S>;
 };
 
 const toS = <P, S>(props: Readonly<P & S>, actions: Actions<S>): S => {
@@ -60,29 +45,32 @@ export const physicallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     state = toS<P, S>(this.props, actions);
 
     s: Subscriptions<S> = {};
-    o = mkObservers(this, actions);
+    v = mkValues<P, S>(this, actions);
 
-    componentWillReceiveProps(to: P & S) {
+    componentWillReceiveProps(nextProps: P & S) {
+      const state = this.state;
+
       for (const k in actions) {
-        const p = actions[k];
-        const a = this.s[k];
-        if (a) {
-          a.setSpringTarget(to[k]);
-          p.acceleration !== undefined && a.setAcceleration(p.acceleration);
-          p.restSpeed !== undefined && a.setRestSpeed(p.restSpeed);
-          p.friction !== undefined && a.setFriction(p.friction);
-          p.springStrength !== undefined &&
-            a.setSpringStrength(p.springStrength);
-          p.velocity !== undefined && a.setVelocity(p.velocity);
-        } else {
-          const physicsOptions = {
-            ...(p as any),
-            from: this.state[k],
-            to: to[k]
-          };
+        const to = nextProps[k];
+        if (this.props[k] !== to) {
+          this.s[k] && (this.s[k].stop());
 
-          this.s[k] = physics(physicsOptions).start(this.o[k]);
+          const v = this.v[k];
+          this.s[k] = actions[k](v.get() as any, v.getVelocity(), to).start(this.v[k]);
         }
+      }
+    }
+
+    componentDidMount() {
+      for (const k in this.v) {
+        this.v[k].subscribe({
+          update: v => {
+            this.setState({ [k]: v } as any)
+          },
+          complete: () => {
+            this.s[k] = undefined;
+          }
+        } as any)
       }
     }
 

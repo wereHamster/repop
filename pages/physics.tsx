@@ -1,5 +1,5 @@
 import * as React from "react";
-import { spring } from "popmotion";
+import { spring, physics, chain, delay } from "popmotion";
 import { animated } from "../src/animated";
 import { physicallyAnimated } from "../src/physicallyAnimated";
 import Prando from "prando";
@@ -9,6 +9,8 @@ const oy = 200;
 const theta = 1.2;
 
 export interface State {
+  generation: number;
+
   cx: number;
   cy: number;
 
@@ -18,10 +20,10 @@ export interface State {
 const prng = new Prando();
 
 export default class extends React.PureComponent<{}, State> {
-  state: State = { cx: 200, cy: 50, last: [] };
+  state: State = { generation: 0, cx: 200, cy: 50, last: [] };
 
   advance = () => {
-    const { cx, cy } = this.state;
+    const { generation, cx, cy } = this.state;
 
     // Copy current position to the 'last' array.
     const last = this.state.last.slice(0, 3);
@@ -32,7 +34,7 @@ export default class extends React.PureComponent<{}, State> {
     const y = Math.sin(theta) * (cx - ox) + Math.cos(theta) * (cy - oy) + oy;
 
     // Update the state.
-    this.setState({ cx: prng.nextInt(0, 800), cy: prng.nextInt(0, 800), last });
+    this.setState({ generation: generation + 1, cx: prng.nextInt(0, 800), cy: prng.nextInt(0, 800), last });
 
     // And reschedule.
     setTimeout(this.advance, 1000);
@@ -45,8 +47,9 @@ export default class extends React.PureComponent<{}, State> {
   componentDidMount() {
     this.advance();
   }
+
   render() {
-    const { cx, cy, last } = this.state;
+    const { generation, cx, cy, last } = this.state;
 
     return (
       <svg width={800} height={800}>
@@ -57,7 +60,7 @@ export default class extends React.PureComponent<{}, State> {
         <PhysicallyAnimatedCircle
           cx={cx}
           cy={cy}
-          r={6}
+          r={(generation % 2) * 20 + 10}
           fill="magenta"
           fillOpacity={0.8}
         />
@@ -107,19 +110,33 @@ const PhysicallyAnimatedCircle = physicallyAnimated<
   {
     cx: number;
     cy: number;
+    r: number,
   }
 >({
   actions: {
-    cx: {
-      springStrength: 10,
-      acceleration: 5,
-      friction: 0.5
-    },
-    cy: {
-      springStrength: 10,
-      acceleration: 5,
-      friction: 0.5
-    }
+    cx: (from, velocity, to) => physics({
+      from,
+      velocity,
+      to,
+      springStrength: 50,
+      acceleration: 1,
+      friction: 0.8
+    }),
+    cy: (from, velocity, to) => physics({
+      from,
+      velocity,
+      to,
+      springStrength: 50,
+      acceleration: 1,
+      friction: 0.8
+    }),
+    r: (from, velocity, to) => physics({
+      from,
+      velocity,
+      to,
+      springStrength: 200,
+      friction: 0.9
+    }),
   },
   render: props => {
     return <circle {...props} />;

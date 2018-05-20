@@ -7,15 +7,12 @@ export type Actions<T> = { [P in keyof T]: (from: T[P], velocity: number, to: T[
 
 type Subscriptions<T> = { [P in keyof T]?: undefined | ColdSubscription };
 
-const clearSubscriptions = <T>(s: Subscriptions<T>) => {
-  for (const k in s) {
-    s[k] && s[k].stop();
-  }
-};
+const stop = (s: undefined | ColdSubscription) =>
+  s && (s as any).stop();
 
 type Component<P, S> = React.Component<P & S, S> & { s: Subscriptions<S> };
 
-type Values<T> = { [P in keyof T]?: ValueReaction };
+type Values<T> = { [P in keyof T]: ValueReaction };
 const mkValues = <P, S>(self: Component<P, S>, a: Actions<S>): Values<S> => {
   const s: any = {};
   for (const k in a) {
@@ -48,12 +45,10 @@ export const physicallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     v = mkValues<P, S>(this, actions);
 
     componentWillReceiveProps(nextProps: P & S) {
-      const state = this.state;
-
       for (const k in actions) {
         const to = nextProps[k];
         if (this.props[k] !== to) {
-          this.s[k] && (this.s[k].stop());
+          stop(this.s[k]);
 
           const v = this.v[k];
           this.s[k] = actions[k](v.get() as any, v.getVelocity(), to).start(this.v[k]);
@@ -64,7 +59,7 @@ export const physicallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     componentDidMount() {
       for (const k in this.v) {
         this.v[k].subscribe({
-          update: v => {
+          update: (v: number) => {
             this.setState({ [k]: v } as any)
           },
           complete: () => {
@@ -75,7 +70,9 @@ export const physicallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     }
 
     componentWillUnmount() {
-      clearSubscriptions(this.s);
+      for (const k in this.s) {
+        stop(this.s[k]);
+      }
     }
 
     render() {

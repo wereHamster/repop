@@ -10,11 +10,14 @@ type Observers<T> = { [P in keyof T]: any };
 
 type Component<T> = React.Component<{}, T> & { s: Subscriptions<T> };
 
+const stop = (s: undefined | ColdSubscription) =>
+  s && (s as any).stop();
+
 const mkObservers = <T>(self: Component<T>, p: Actions<T>): Observers<T> => {
   const s: any = {};
   for (const k in p) {
     s[k] = {
-      update: v => {
+      update: (v: number) => {
         self.setState({ [k]: v } as any);
       },
       complete: () => {
@@ -51,7 +54,7 @@ export const partiallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     componentWillReceiveProps(nextProps: P & S) {
       for (const k in actions) {
         if (this.props[k] !== nextProps[k]) {
-          this.s[k] && this.s[k].stop();
+          stop(this.s[k]);
           this.s[k] = actions[k](this.state[k], nextProps[k]).start(this.o[k]);
         }
       }
@@ -59,7 +62,7 @@ export const partiallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
 
     componentWillUnmount() {
       for (const k in this.s) {
-        this.s[k] && this.s[k].stop();
+        stop(this.s[k]);
       }
     }
 

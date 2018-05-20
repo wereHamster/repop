@@ -8,6 +8,7 @@ next.config.js
 .babelrc
 .npmignore
 tsconfig.json
+tslint.json
 yarn.lock
 *.ts
 !*.d.ts

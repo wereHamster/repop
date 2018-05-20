@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "license": "MIT",
   "peerDependencies": {
-    "popmotion": "^8.0.0",
     "react": "^16.0.0"
   },
   "devDependencies": {

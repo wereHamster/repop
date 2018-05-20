@@ -54,11 +54,12 @@ export const partiallyAnimated = <P, S>(o: O<P, S>): R<P & S> => {
     s: Subscriptions<S> = {};
     o = mkObservers(this, actions);
 
-    componentWillReceiveProps(to: P & S) {
-      clearSubscriptions(this.s);
-
+    componentWillReceiveProps(nextProps: P & S) {
       for (const k in actions) {
-        this.s[k] = actions[k](this.state[k], to[k]).start(this.o[k]);
+        if (this.props[k] !== nextProps[k]) {
+          this.s[k] && (this.s[k].stop());
+          this.s[k] = actions[k](this.state[k], nextProps[k]).start(this.o[k]);
+        }
       }
     }
 
